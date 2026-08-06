@@ -1342,7 +1342,7 @@ function openBracket(y){
   const byeSet = new Set((B.byes||[]).map(b=>b.mgr));
   const nm = (s,rd) => `${s.seed?`<span class="bk-seed">#${s.seed}</span>`:''}${s.mgr}${s.mgr===s.team?'':` <span class="dim">${s.team}</span>`}`
     + ((rd==='Semifinal' && byeSet.has(s.mgr)) ? `<span class="bk-star" title="First-round bye">★</span>` : '');
-  let h = `<button class="gc-close">✕</button><h3>${y} Playoff Bracket</h3>`;
+  let h = `<button class="gc-close" data-x>✕</button><h3>${y} Playoff Bracket</h3>`;
   B.rounds.forEach(r=>{
     const wk = RDWK(y, r.name);
     h += `<div class="bk-rd"><span class="bk-lbl">${r.name}${r.name==='Championship'?' 🏆':''}</span><span class="bk-wk">Week ${wk}</span></div>`;
