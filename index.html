@@ -450,25 +450,20 @@ function show(id){
   const cwk = y => (y===2019||y===2020)?16:17;
   let h = `<h2>Storylines</h2>`;
 
-  h += `<h2 style="font-size:18px">💔 The Heartbreak Wing</h2><div class="bracket">`;
+  const LORE = (EXTRAS.research&&EXTRAS.research.lore)||[];
+  const loreFor = (y,rd) => LORE.find(l=>l.y===y && l.rd===rd);
+  h += `<h2 style="font-size:18px">💔 The Heartbreak Wing</h2>`;
   DATA.postseason.games.filter(g=>Math.abs(g.wp-g.lp)<4).sort((a,b)=>(a.wp-a.lp)-(b.wp-b.lp)).forEach(g=>{
     const base=(g.y===2019||g.y===2020)?13:14; const hw = base + ({Quarterfinal:1,Semifinal:2,Championship:3})[g.rd];
-    h += `<div class="game gcrow" data-gcm="${g.y}.${hw}.${g.w}.${g.l}" data-f="${g.w}" title="Open box score"><div class="rd">${g.y} · ${g.rd} · margin ${fmt(g.wp-g.lp)}</div>
-      <div class="row w"><span>${g.w}</span><span>${fmt(g.wp)}</span></div>
-      <div class="row"><span>${g.l}</span><span>${fmt(g.lp)}</span></div></div>`;
+    const L = loreFor(g.y,g.rd);
+    h += `<div class="exp${L?' lore':''}"><div class="exp-h">
+        <span class="exp-rank">${g.y}</span>
+        <span class="exp-t">${g.w} <span class="dim">beat</span> ${g.l}${L?' <span class="lore-tag">🎙️ the story</span>':''}</span>
+        <span class="exp-n">${fmt(g.wp-g.lp)}</span><span class="exp-c">▾</span></div>
+      <div class="exp-d"><div class="exp-meta">${g.rd} · ${fmt(g.wp)}–${fmt(g.lp)} · decided by ${fmt(g.wp-g.lp)}</div>
+        ${L?`<div class="lore-b">${L.body}</div>${L.note?`<div class="lore-n">📎 ${L.note}</div>`:''}<div class="lore-by">— as told by ${L.teller}</div>`:''}
+        <div class="exp-link gcrow" data-gcm="${g.y}.${hw}.${g.w}.${g.l}" data-f="${g.w}">open the box score →</div></div></div>`;
   });
-  h += '</div>';
-
-  const LORE = (EXTRAS.research&&EXTRAS.research.lore)||[];
-  if(LORE.length){
-    h += `<h2 style="font-size:18px">🎙️ Told by the people who were there</h2>`;
-    LORE.forEach(l=>{
-      h += `<div class="exp lore"><div class="exp-h"><span class="lore-em">${l.em}</span><span class="exp-t">${l.head}</span><span class="exp-c">▾</span></div>
-        <div class="exp-d"><div class="exp-meta">${l.y} ${l.rd} · ${l.score} · as told by ${l.teller}</div>
-        <div class="lore-b">${l.body}</div>
-        ${l.note?`<div class="lore-n">📎 ${l.note}</div>`:''}</div></div>`;
-    });
-  }
 
   h += `<h2 style="font-size:18px">🥶 The Chokes</h2><div class="bracket">`;
   S.chokes.forEach(c=>{
@@ -1097,6 +1092,9 @@ li.gcrow{cursor:pointer}
 .exp-link{margin-top:9px; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--gold); font-weight:700; cursor:pointer}
 .exp-link:hover{text-decoration:underline}
 .lore{border-left:3px solid var(--gold)}
+.lore-tag{display:inline-block; margin-left:7px; font-size:9.5px; letter-spacing:.09em; text-transform:uppercase;
+  color:#0f1620; background:var(--gold); border-radius:5px; padding:2px 6px; font-weight:800; vertical-align:middle}
+.lore-by{margin-top:10px; font-size:11.5px; color:var(--gold); letter-spacing:.03em; font-style:italic}
 .lore-em{font-size:16px}
 .lore-b{font-size:13.5px; line-height:1.68; color:#c4c4c4; margin-top:4px}
 .lore-b b{color:#fff}
