@@ -712,7 +712,7 @@ function show(id){
   T.active.forEach(r=>{ head += `<tr><td class="name">${r.mgr}</td><td class="gold-t">${r.n}</td><td>${r.a}</td><td>${r.d}</td><td>${r.t}</td></tr>`; });
   head += `</tbody></table></div><div class="note">Deeper analysis lives in <b>Trade Block</b> and <b>Waiver Wire</b> — this tab is the raw searchable record.</div>`;
 
-  head += `<h2 style="font-size:18px">📜 The full log</h2><div class="sub">Pick a season, filter by move type, or search any player or team.</div>
+  head += `<h2 style="font-size:18px">📜 The full log</h2><div class="sub">Pick a season, filter by move type, or search any player or team. Trades are folded back into whole deals — every player who changed hands in the same swap sits in one entry.</div>
     <div class="chips" id="tx-years">${Object.keys(TXN).sort((a,b)=>b-a).map(y=>`<button data-y="${y}">${y}</button>`).join('')}</div>
     <div class="chips" id="tx-types">${[['*','All'],['A','Adds'],['D','Drops'],['T','Trades']].map(([k,l])=>`<button data-t="${k}">${l}</button>`).join('')}</div>
     <div class="searchbar"><input id="tx-q" type="search" placeholder="Search a player, position or team…" aria-label="Search transactions"></div>
@@ -725,15 +725,55 @@ function show(id){
     let list = D.rows.map(r=>r.split('|'));
     if(curT!=='*') list = list.filter(r=>r[2]===curT);
     if(curQ) list = list.filter(r=> (r[3]+' '+label(curY,r[4])+' '+label(curY,r[5])).toLowerCase().includes(curQ));
-    const total = list.length;
-    const shown = list.slice(0,500);
-    let h = `<div class="round-lbl">${total.toLocaleString()} move${total===1?'':'s'}${total>500?' — showing the first 500':''}</div><div class="txlist">`;
-    shown.forEach(r=>{
-      const [d,wk,tp,pl,f,to]=r;
-      h += `<div class="txrow tx-${tp}"><span class="txd">${d.slice(0,2)}/${d.slice(2)} <span class="dim">Wk ${wk}</span></span>
-        <span class="txt2">${TYPE[tp]}</span>
-        <span class="txp">${pl}</span>
-        <span class="txm">${label(curY,f)} <span class="dim">→</span> ${label(curY,to)}</span></div>`;
+    // --- fold the per-player trade rows back into whole deals ---
+    // NFL.com and Sleeper both log a trade one player at a time. A deal is every
+    // trade row sharing a date whose teams are connected (so 3-team deals hold together).
+    const items = [];
+    const byDate = new Map();
+    list.forEach(r=>{
+      if(r[2]!=='T'){ items.push({k:'one', r}); return; }
+      const key = r[0];
+      if(!byDate.has(key)) byDate.set(key, []);
+      byDate.get(key).push(r);
+    });
+    const seenDate = new Set();
+    list.forEach(r=>{
+      if(r[2]!=='T' || seenDate.has(r[0])) return;
+      seenDate.add(r[0]);
+      const rows = byDate.get(r[0]);
+      // union-find over the team codes so multi-team deals stay together
+      const par = {};
+      const find = x => { while(par[x]!==x) x = par[x] = par[par[x]]; return x; };
+      rows.forEach(x=>{ [x[4],x[5]].forEach(t=>{ if(par[t]===undefined) par[t]=t; }); });
+      rows.forEach(x=>{ const a=find(x[4]), b=find(x[5]); if(a!==b) par[a]=b; });
+      const deals = new Map();
+      rows.forEach(x=>{ const g=find(x[4]); if(!deals.has(g)) deals.set(g,[]); deals.get(g).push(x); });
+      deals.forEach(rs=>{
+        const got = new Map();                 // receiving team -> [players]
+        rs.forEach(x=>{ if(!got.has(x[5])) got.set(x[5],[]); got.get(x[5]).push(x[3]); });
+        items.push({k:'trade', d:rs[0][0], wk:rs[0][1], got, n:rs.length});
+      });
+    });
+    const total = items.length;
+    const shown = items.slice(0,400);
+    const moved = items.reduce((a,x)=> a + (x.k==='trade'? x.n : 1), 0);
+    let h = `<div class="round-lbl">${total.toLocaleString()} entr${total===1?'y':'ies'}${moved!==total? ` · ${moved.toLocaleString()} player movements`:''}${total>400?' — showing the first 400':''}</div><div class="txlist">`;
+    shown.forEach(it=>{
+      if(it.k==='one'){
+        const [d,wk,tp,pl,f,to]=it.r;
+        h += `<div class="txrow tx-${tp}"><span class="txd">${d.slice(0,2)}/${d.slice(2)} <span class="dim">Wk ${wk}</span></span>
+          <span class="txt2">${TYPE[tp]}</span>
+          <span class="txp">${pl}</span>
+          <span class="txm">${label(curY,f)} <span class="dim">→</span> ${label(curY,to)}</span></div>`;
+        return;
+      }
+      const sides = [...it.got.entries()];
+      h += `<div class="txdeal"><div class="txdeal-hd"><span class="txd">${it.d.slice(0,2)}/${it.d.slice(2)} <span class="dim">Wk ${it.wk}</span></span>
+        <span class="txt2">${sides.length>2? sides.length+'-team trade' : 'Trade'}</span>
+        <span class="txdeal-n">${it.n} player${it.n===1?'':'s'}</span></div>
+        <div class="txdeal-body" style="grid-template-columns:repeat(${Math.min(sides.length,3)},1fr)">
+        ${sides.map(([team,ps])=>`<div class="txdeal-side"><div class="txdeal-team">${label(curY,team)} <span class="dim">receives</span></div>${ps.map(p=>`<div class="txdeal-p">${p}</div>`).join('')}</div>`).join('')}
+        </div></div>`;
     });
     h += '</div>';
     document.getElementById('tx-body').innerHTML = h;
@@ -894,6 +934,15 @@ show('rafters');
 .tb-story{margin-top:11px; padding-top:11px; border-top:1px dashed var(--line); font-size:13.5px; line-height:1.6; color:var(--chalk)}
 .tb-story b{color:var(--gold)}
 @media(max-width:680px){ .tb-body{grid-template-columns:1fr; gap:8px} .tb-x{text-align:center} }
+.txdeal{border:1px solid rgba(212,175,55,.26);border-left:3px solid var(--gold);border-radius:10px;margin:7px 0;background:linear-gradient(180deg,rgba(212,175,55,.055),rgba(255,255,255,.012));overflow:hidden}
+.txdeal-hd{display:flex;align-items:center;gap:12px;padding:9px 13px 8px;border-bottom:1px solid rgba(255,255,255,.07)}
+.txdeal-n{margin-left:auto;font-size:11px;color:#8d8d8d;letter-spacing:.04em}
+.txdeal-body{display:grid;gap:1px;background:rgba(255,255,255,.06)}
+.txdeal-side{background:#0f1620;padding:10px 13px 11px}
+.txdeal-team{font-size:12px;font-weight:700;color:var(--gold);letter-spacing:.03em;margin-bottom:6px}
+.txdeal-team .dim{font-weight:400;letter-spacing:0}
+.txdeal-p{font-size:13.5px;color:#e8e8e8;padding:2px 0;line-height:1.45}
+@media(max-width:620px){.txdeal-body{grid-template-columns:1fr !important}}
 .txlist{display:flex; flex-direction:column; gap:4px; margin-top:10px}
 .txrow{display:grid; grid-template-columns:104px 62px 1fr 1fr; gap:10px; align-items:baseline; background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--line); border-radius:8px; padding:8px 12px; font-size:13px}
 .txrow.tx-A{border-left-color:#5FA97B} .txrow.tx-D{border-left-color:#A34D4D} .txrow.tx-T{border-left-color:var(--wood)}
