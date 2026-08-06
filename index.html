@@ -406,11 +406,12 @@ function show(id){
 
   h += `<h2 style="font-size:18px">📈 Greatest Championship Runs</h2><div class="bracket">`;
   S.champruns.forEach((r,i)=>{
-    h += `<div class="game gcrow" data-gcm1="${r.y}.${cwk(r.y)}.${r.mgr}" data-f="${r.mgr}" title="Open the title game"><div class="rd">#${i+1} · ${r.y} · ${r.mgr}${r.mgr===r.team?'':' · '+r.team}${r.bye?' · had a bye':''}</div>
-      <div class="row ln w"><span>${fmt(r.ppg)} pts per playoff game <span class="dim" style="font-weight:400">· avg win margin ${fmt(r.avg_margin)}</span></span></div>
-      <div class="row ln"><span class="dim">${r.games.map(g=>`${g.rd==='Quarterfinal'?'QF':g.rd==='Semifinal'?'SF':'🏆 Final'} ${fmt(g.p)}–${fmt(g.o)} vs ${g.opp}`).join(' · ')}</span></div></div>`;
+    h += `<div class="exp"><div class="exp-h"><span class="exp-rank">#${i+1}</span><span class="exp-t">${r.mgr} <span class="dim">${r.y}</span></span><span class="exp-n">${fmt(r.ppg)}</span><span class="exp-c">▾</span></div>
+      <div class="exp-d"><div class="exp-meta">${fmt(r.ppg)} pts per playoff game · avg win margin ${fmt(r.avg_margin)}${r.bye?' · had a bye':' · no bye'}${r.mgr===r.team?'':' · '+r.team}</div>
+      ${r.games.map(g=>`<div class="exp-row"><span>${g.rd==='Quarterfinal'?'Quarterfinal':g.rd==='Semifinal'?'Semifinal':'🏆 Final'} <span class="dim">vs ${g.opp}</span></span><span>${fmt(g.p)}–${fmt(g.o)}</span></div>`).join('')}
+      <div class="exp-link gcrow" data-gcm1="${r.y}.${cwk(r.y)}.${r.mgr}" data-f="${r.mgr}">open the title game →</div></div></div>`;
   });
-  h += `</div><div class="note">Matt's 2025 run is the gold standard: <b>138.0 points per game across three rounds with no bye</b> — the hardest road, walked the loudest. At the other end, Garrett's 2023 title run averaged 104.81 and remains the scrappiest ring on record.</div>`;
+  h += `</div>`;
 
   h += `<h2 style="font-size:18px">🦸 Championship-Game Heroes</h2><div class="grid2"><div class="card"><h3>Top title-game performances</h3><ol>`;
   EXTRAS.hof.title_heroes.forEach(r=>{
@@ -434,7 +435,8 @@ function show(id){
         <div><b>${d.pw}-${d.pl}</b><span>playoff record</span></div>
       </div>
       <div class="dyn-years">${d.titles.map(y=>EXTRAS.brackets[y]?`<button class="dyn-yr brkrow" data-brk="${y}" title="Open the ${y} bracket">🏆 ${y}</button>`:`<span class="dyn-yr off">🏆 ${y}</span>`).join('')}${d.finals.filter(y=>!d.titles.includes(y)).map(y=>`<span class="dyn-yr lost">🥈 ${y}</span>`).join('')}</div>
-      <ul class="dyn-lines">${d.lines.map(l=>`<li>${l}</li>`).join('')}</ul>
+      <div class="exp dyn-exp"><div class="exp-h"><span class="exp-t">what he did</span><span class="exp-c">▾</span></div>
+      <div class="exp-d"><ul class="dyn-lines">${d.lines.map(l=>`<li>${l}</li>`).join('')}</ul></div></div>
     </div>`;
   });
   h += `</div>`;
@@ -459,9 +461,11 @@ function show(id){
 
   h += `<h2 style="font-size:18px">🥶 The Chokes</h2><div class="bracket">`;
   S.chokes.forEach(c=>{
-    h += `<div class="game gcrow" data-gcm="${c.y}.${c.wk}.${c.lost_to}.${c.mgr}" data-f="${c.mgr}" title="Open the loss"><div class="rd">${c.y} · #1 seed${c.mgr===c.team?'':' · '+c.team}</div>
-      <div class="row ln"><span>${c.mgr} <span class="dim">— went ${c.w}-${c.l_} in the regular season, earned a first-round bye as the #1 seed, then lost the ${c.rd} to ${c.lost_to} ${fmt(c.wp)}–${fmt(c.lp)}</span></span></div>
-      <div class="row ln"><span class="dim">best record in the league, zero hardware — the ring went to</span> <span class="gold-t">${c.champ}</span></div></div>`;
+    h += `<div class="exp"><div class="exp-h"><span class="exp-rank">${c.y}</span><span class="exp-t">${c.mgr} <span class="dim">out in the ${c.rd.toLowerCase()}</span></span><span class="exp-c">▾</span></div>
+      <div class="exp-d"><div class="exp-meta">#1 seed at ${c.w}-${c.l_}${c.mgr===c.team?'':' · '+c.team} · had the bye</div>
+      <div class="exp-row"><span>lost to <b>${c.lost_to}</b></span><span>${fmt(c.wp)}–${fmt(c.lp)}</span></div>
+      <div class="exp-row"><span>the ring went to</span><span class="gold-t">${c.champ}</span></div>
+      <div class="exp-link gcrow" data-gcm="${c.y}.${c.wk}.${c.lost_to}.${c.mgr}" data-f="${c.mgr}">open the loss →</div></div></div>`;
   });
   h += `</div>`;
 
@@ -474,12 +478,11 @@ function show(id){
   h += `<h2 style="font-size:18px">🔮 The What-If Machine</h2><div class="wi-wrap">`;
   S.whatif.forEach(e=>{
     const base=(e.y===2019||e.y===2020)?13:14; const wk=base+({Quarterfinal:1,Semifinal:2})[e.rd];
-    h += `<div class="wi-card gcrow" data-gcm="${e.y}.${wk}.${e.w}.${e.l}" data-f="${e.l}" title="Open the real box score">
-      <div class="wi-top"><span class="wi-yr">${e.y} · ${e.rd}</span><span class="wi-verdict">${e.verdict}</span></div>
-      <div class="wi-line"><span class="wi-lbl">What happened</span>${e.happened}</div>
+    h += `<div class="exp"><div class="exp-h"><span class="exp-rank">${e.y}</span><span class="exp-t">${e.l} lost the ${e.rd.toLowerCase()} by ${fmt(e.m)}</span><span class="exp-tag">${e.verdict}</span><span class="exp-c">▾</span></div>
+      <div class="exp-d"><div class="wi-line"><span class="wi-lbl">What happened</span>${e.happened}</div>
       <div class="wi-line"><span class="wi-lbl">The flip</span>${e.flip}</div>
       ${e.alt?`<div class="wi-line"><span class="wi-lbl">What would've happened</span>${e.alt}</div>`:''}
-    </div>`;
+      <div class="exp-link gcrow" data-gcm="${e.y}.${wk}.${e.w}.${e.l}" data-f="${e.l}">open the real box score →</div></div></div>`;
   });
   h += `</div>`;
 
@@ -509,12 +512,12 @@ function show(id){
   if(H2H.length){
     h += `<h3 style="font-size:14px;margin:18px 0 4px;letter-spacing:.06em;color:var(--gold)">🩸 WHEN IT ACTUALLY MATTERED</h3><div class="bracket">`;
     H2H.forEach(p=>{
-      h += `<div class="game"><div class="rd">${p.a} vs ${p.b} · <span class="gold-t">${p.aw}–${p.bw} in the playoffs</span></div>`;
+      h += `<div class="exp"><div class="exp-h"><span class="exp-t">${p.a} vs ${p.b}</span><span class="exp-n">${p.aw}–${p.bw}</span><span class="exp-c">▾</span></div><div class="exp-d">`;
       p.games.forEach(g=>{
         const wk = ({Quarterfinal:0,Semifinal:1,Championship:2}[g.rd]) + ((g.y===2019||g.y===2020)?14:15);
-        h += `<div class="row ln gcrow" data-gcm="${g.y}.${wk}.${g.w}.${g.l}" data-f="${g.w}" title="Open the box score" style="cursor:pointer"><span><b>${g.w}</b> <span class="dim">beat</span> ${g.l} <span class="dim">· ${g.y} ${g.rd}${g.rd==='Championship'?' 🏆':''}</span></span><span class="dim">${fmt(g.wp)}–${fmt(g.lp)}</span></div>`;
+        h += `<div class="exp-row gcrow" data-gcm="${g.y}.${wk}.${g.w}.${g.l}" data-f="${g.w}" title="Open the box score" style="cursor:pointer"><span><b>${g.w}</b> <span class="dim">beat ${g.l} · ${g.y} ${g.rd}${g.rd==='Championship'?' 🏆':''}</span></span><span>${fmt(g.wp)}–${fmt(g.lp)}</span></div>`;
       });
-      h += `</div>`;
+      h += `</div></div>`;
     });
     h += `</div>`;
   }
@@ -695,10 +698,10 @@ function show(id){
     const lv = RING(lose.c) ? 'Lost the trade and won the title anyway — the only thing that actually counts.'
              : lose.c.fin==='missed the playoffs' ? 'Nothing came back, and neither did the season.'
              : 'The points went the other way, but the season lasted into December.';
-    let s = line(win,wv) + line(lose,lv);
+    let s = `<div class="exp-h tb-toggle"><span class="exp-t">how it panned out</span><span class="exp-c">▾</span></div><div class="exp-d">` + line(win,wv) + line(lose,lv);
     if(RING(win.c) && lose.c.fin==='missed the playoffs') s += `<div class="tb-verdict">One side bought a ring. The other bought December off.</div>`;
     else if(RING(lose.c)) s += `<div class="tb-verdict">Proof that winning a trade and winning the league are different sports.</div>`;
-    return `<div class="tb-story">${s}</div>`;
+    return `<div class="tb-story exp">${s}</div></div>`;
   }
   const card=(d,extra)=>{const aw=d.ap>d.bp;return `<div class="tb-card"><div class="tb-hd">${d.y} · Week ${d.wk}${extra?' <span class="dim">· '+extra+'</span>':''}</div><div class="tb-body">${side(d.a,d.ain,d.ap,aw)}<div class="tb-x">⇄</div>${side(d.b,d.bin,d.bp,!aw)}</div>${story(d)}</div>`;};
   const moment=m=>`<div class="mo-card"><div class="mo-head" role="button" tabindex="0"><div class="mo-tag">${m.em?m.em+' ':''}${m.tag}</div><div class="mo-title">${m.title}</div><div class="mo-more"><span class="mo-more-t">the full story</span><span class="mo-chev">▾</span></div></div><div class="mo-detail"><div class="mo-body">${m.body}</div><div class="mo-stats">${m.stats.map(s=>`<div><b>${s[1]}</b><span>${s[0]}</span></div>`).join('')}</div>${m.kicker?`<div class="mo-kick">${m.kicker}</div>`:''}</div></div>`;
@@ -706,7 +709,7 @@ function show(id){
   let h=`<h2>Trade Block</h2><div class="statline">${R.total} trades · ${R.counts.reduce((a,b)=>a+b.pieces,0)} players · starter points only</div>`;
   h+=`<h2 style="font-size:18px">🎬 Defining moments</h2><div class="mo-wrap">${M.map(moment).join('')}</div>`;
   const FP=EXTRAS.research.fineprint;
-  h+=`<h2 style="font-size:18px">🩺 Why some numbers look insane</h2><div class="fp-wrap">${FP.map(f=>`<div class="fp-card"><div class="fp-h"><span class="fp-em">${f.em}</span>${f.head}</div><div class="fp-b">${f.body}</div></div>`).join('')}</div>`;
+  h+=`<h2 style="font-size:18px">🩺 Why some numbers look insane</h2><div class="fp-wrap">${FP.map(f=>`<div class="exp fp-card"><div class="exp-h"><span class="fp-em">${f.em}</span><span class="exp-t">${f.head}</span><span class="exp-c">▾</span></div><div class="exp-d"><div class="fp-b">${f.body}</div></div></div>`).join('')}</div>`;
   h+=`<h2 style="font-size:18px">🏆 League-altering trades</h2><div class="tb-wrap">${R.altering.map(d=>card(d, d.why==='won the championship'?'the buyer won it all':'the buyer reached the final')).join('')}</div>`;
   h+=`<h2 style="font-size:18px">🥊 Biggest fleecings</h2><div class="tb-wrap">${R.lopsided.slice(0,3).map(d=>card(d,'gap of '+fmt(Math.abs(d.diff))+' pts')).join('')}</div>`;
   h+=`<h2 style="font-size:18px">📦 Blockbusters</h2><div class="tb-wrap">${R.biggest.slice(0,3).map(d=>card(d,d.n+' players')).join('')}</div>`;
@@ -720,7 +723,7 @@ function show(id){
   h+=`<div class="card"><h3>📅 Trade volume</h3><ol>${Object.keys(R.byyear).sort((a,b)=>b-a).map(y=>`<li><span><span class="who">${y}</span></span><span class="pts"><span style="display:inline-block;height:7px;border-radius:3px;background:var(--wood);width:${Math.round(110*R.byyear[y]/mx)}px;vertical-align:middle"></span> ${R.byyear[y]}</span></li>`).join('')}</ol></div>`;
   h+=`</div>`;
   const LG=EXTRAS.research.ledger;
-  h+=`<h2 style="font-size:18px">📐 How to read these numbers</h2><div class="lg-wrap">${LG.map(l=>`<div class="lg-card"><div class="lg-h">${l.head}</div><div class="lg-b">${l.body}</div></div>`).join('')}</div>`;
+  h+=`<h2 style="font-size:18px">📐 How to read these numbers</h2><div class="lg-wrap">${LG.map(l=>`<div class="exp lg-card"><div class="exp-h"><span class="exp-t">${l.head}</span><span class="exp-c">▾</span></div><div class="exp-d"><div class="lg-b">${l.body}</div></div></div>`).join('')}</div>`;
   const el=document.getElementById('sec-trades'); el.innerHTML=h;
   el.addEventListener('click',e=>{
     const li=e.target.closest('[data-trade]'); if(!li) return;
@@ -1065,6 +1068,32 @@ li.gcrow{cursor:pointer}
 .mo-title{font-family:'Archivo Black',sans-serif; font-size:17px; line-height:1.25; margin:6px 0 10px}
 .mo-body{font-size:14px; line-height:1.65; color:var(--chalk)}
 .mo-body b{color:var(--gold)}
+.exp{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.012)); border:1px solid var(--line);
+  border-radius:10px; margin:7px 0; overflow:hidden}
+.exp-h{display:flex; align-items:center; gap:9px; padding:11px 13px; cursor:pointer; user-select:none}
+.exp-rank{font:700 11px 'IBM Plex Mono',monospace; color:var(--muted); min-width:30px}
+.exp-t{flex:1; font-size:14px; font-weight:700; color:#eaeaea; line-height:1.35}
+.exp-t .dim{font-weight:400}
+.exp-n{font:700 14px 'IBM Plex Mono',monospace; color:var(--gold)}
+.exp-tag{font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); text-align:right; max-width:92px; line-height:1.25}
+.exp-c{color:var(--gold); font-size:12px; transition:transform .18s; flex:0 0 auto}
+.exp.open .exp-c{transform:rotate(180deg)}
+.exp-d{display:none; padding:0 13px 13px}
+.exp.open .exp-d{display:block}
+.exp-meta{font-size:11.5px; color:var(--muted); letter-spacing:.02em; padding:2px 0 8px; border-top:1px solid rgba(255,255,255,.07); margin-top:2px; padding-top:9px}
+.exp-row{display:flex; justify-content:space-between; gap:12px; font-size:13px; padding:4px 0; color:#c9c9c9}
+.exp-row b{color:#fff}
+.exp-link{margin-top:9px; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--gold); font-weight:700; cursor:pointer}
+.exp-link:hover{text-decoration:underline}
+.dyn-exp{background:none; border:none; margin:6px 0 0; border-top:1px solid rgba(255,255,255,.08); border-radius:0}
+.dyn-exp .exp-h{padding:9px 0 0}
+.dyn-exp .exp-d{padding:0}
+.dyn-exp .exp-t{font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--gold)}
+.dyn-exp .dyn-lines{margin-top:8px}
+.tb-story.exp{background:none; border:none; margin:10px 0 0; border-top:1px solid rgba(255,255,255,.08); border-radius:0}
+.tb-story.exp .exp-h{padding:9px 0 0}
+.tb-story.exp .exp-d{padding:0}
+.tb-story.exp .exp-t{font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--gold)}
 .mo-head{cursor:pointer; user-select:none}
 .mo-head:focus-visible{outline:2px solid var(--gold); outline-offset:3px; border-radius:6px}
 .mo-more{display:flex; align-items:center; gap:6px; margin-top:9px; font-size:11px; letter-spacing:.09em;
@@ -1281,8 +1310,9 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.getElemen
 
 // clickable rows elsewhere (week-by-week + brackets in Seasons tab)
 document.addEventListener('click',e=>{
-  const hd=e.target.closest('.mo-head'); if(!hd) return;
-  hd.parentElement.classList.toggle('open');
+  const hd=e.target.closest('.mo-head'); if(hd){ hd.parentElement.classList.toggle('open'); return; }
+  const ex=e.target.closest('.exp-h');
+  if(ex && !e.target.closest('.exp-link')){ ex.closest('.exp').classList.toggle('open'); }
 });
 document.addEventListener('keydown',e=>{
   if(e.key!=='Enter'&&e.key!==' ') return;
