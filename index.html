@@ -195,7 +195,7 @@ function show(id){
       <td>${v.titles.length? '<span class="trophy">'+v.titles.map(y=>yl(y,'t')).join(' ')+'</span>':'<span class="dim">—</span>'}</td>
       <td>${v.runner.length? v.runner.map(y=>yl(y,'r')).join(' '):'<span class="dim">—</span>'}</td>
       <td>${v.third.length? v.third.map(y=>`<span class="gcrow yl bronze" data-gcm1="${y}.${finalWk(y)}.${m}" title="Open the 3rd place game">🥉${y}</span>`).join(' '):'<span class="dim">—</span>'}</td>
-      <td>${yrRanges([...v.years, ...(m==='Matt'?[2017]:[]), ...(m==='Reed'?[2018]:[])])} <span class="dim">(${v.years.length + (m==='Matt'||m==='Reed'?1:0)})</span></td></tr>`;
+      <td>${(()=>{ const ys=[...v.years]; if(ys.length===7){ ys.push(2017,2018); } else { if(m==='Matt') ys.push(2017); if(m==='Reed') ys.push(2018); } return `${yrRanges(ys)} <span class="dim">(${ys.length})</span>`; })()}</td></tr>`;
   });
   html += '</tbody></table></div>';
   // The Basement — regular season last place (the league's real loser)
