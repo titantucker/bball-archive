@@ -406,7 +406,7 @@ function show(id){
 
   h += `<h2 style="font-size:18px">📈 Greatest Championship Runs</h2><div class="bracket">`;
   S.champruns.forEach((r,i)=>{
-    h += `<div class="exp"><div class="exp-h"><span class="exp-rank">#${i+1}</span><span class="exp-t">${r.mgr} <span class="dim">${r.y}</span></span><span class="exp-n">${fmt(r.ppg)}</span><span class="exp-c">▾</span></div>
+    h += `<div class="exp"><div class="exp-h"><span class="exp-rank">#${i+1}</span><span class="exp-t">${r.mgr} <span class="dim">${r.y}</span></span><span class="exp-n">${fmt(r.ppg)}<span class="exp-u">ppg</span></span><span class="exp-c">▾</span></div>
       <div class="exp-d"><div class="exp-meta">${fmt(r.ppg)} pts per playoff game · avg win margin ${fmt(r.avg_margin)}${r.bye?' · had a bye':' · no bye'}${r.mgr===r.team?'':' · '+r.team}</div>
       ${r.games.map(g=>`<div class="exp-row"><span>${g.rd==='Quarterfinal'?'Quarterfinal':g.rd==='Semifinal'?'Semifinal':'🏆 Final'} <span class="dim">vs ${g.opp}</span></span><span>${fmt(g.p)}–${fmt(g.o)}</span></div>`).join('')}
       <div class="exp-link gcrow" data-gcm1="${r.y}.${cwk(r.y)}.${r.mgr}" data-f="${r.mgr}">open the title game →</div></div></div>`;
@@ -424,7 +424,7 @@ function show(id){
   h += `</ol></div></div>`;
 
   h += `<h2 style="font-size:18px">👑 Dynasty Corner</h2><div class="dyn-wrap">`;
-  (EXTRAS.dyn2||[]).forEach(d=>{
+  (EXTRAS.dyn2||[]).filter(d=>d.titles.length>=2).forEach(d=>{
     const rings = d.titles.length;
     h += `<div class="dyn-card${rings>1?' multi':''}">
       <div class="dyn-hd"><span class="dyn-mgr">${d.mgr}</span><span class="dyn-rings">${'💍'.repeat(Math.min(rings,3))||'💍'}</span><span class="dyn-kind">${d.kind}</span></div>
@@ -458,7 +458,7 @@ function show(id){
     const L = loreFor(g.y,g.rd);
     h += `<div class="exp${L?' lore':''}"><div class="exp-h">
         <span class="exp-rank">${g.y}</span>
-        <span class="exp-t">${g.w} <span class="dim">beat</span> ${g.l}${L?' <span class="lore-tag">🎙️ the story</span>':''}</span>
+        <span class="exp-t">${g.w} <span class="dim">beat</span> ${g.l}<span class="exp-sub">${g.rd}</span>${L?' <span class="lore-tag">🎙️ the story</span>':''}</span>
         <span class="exp-n">${fmt(g.wp-g.lp)}</span><span class="exp-c">▾</span></div>
       <div class="exp-d"><div class="exp-meta">${g.rd} · ${fmt(g.wp)}–${fmt(g.lp)} · decided by ${fmt(g.wp-g.lp)}</div>
         ${L?`<div class="lore-b">${L.body}</div>${L.note?`<div class="lore-n">📎 ${L.note}</div>`:''}<div class="lore-by">— as told by ${L.teller}</div>`:''}
@@ -467,7 +467,7 @@ function show(id){
 
   h += `<h2 style="font-size:18px">🥶 The Chokes</h2><div class="bracket">`;
   S.chokes.forEach(c=>{
-    h += `<div class="exp"><div class="exp-h"><span class="exp-rank">${c.y}</span><span class="exp-t">${c.mgr} <span class="dim">out in the ${c.rd.toLowerCase()}</span></span><span class="exp-c">▾</span></div>
+    h += `<div class="exp"><div class="exp-h"><span class="exp-rank">${c.y}</span><span class="exp-t">#1 seed ${c.mgr}<span class="exp-sub">had the bye · out in the ${c.rd.toLowerCase()}</span></span><span class="exp-c">▾</span></div>
       <div class="exp-d"><div class="exp-meta">#1 seed at ${c.w}-${c.l_}${c.mgr===c.team?'':' · '+c.team} · had the bye</div>
       <div class="exp-row"><span>lost to <b>${c.lost_to}</b></span><span>${fmt(c.wp)}–${fmt(c.lp)}</span></div>
       <div class="exp-row"><span>the ring went to</span><span class="gold-t">${c.champ}</span></div>
@@ -497,7 +497,7 @@ function show(id){
   S.unlucky.forEach(r=>{
     h += `<li class="gcrow" ${gct(r)} title="Open their final ${r.y} roster"><span><span class="who">${r.team}</span> <span class="ctx">${r.mgr===r.team?'':r.mgr+' · '}${r.y} · went ${r.w}-${r.l}${r.t?'-'+r.t:''} · ${r.finish}</span></span><span class="pts">${r.pag.toFixed(2)}</span></li>`;
   });
-  h += `</ol></div><div class="card"><h3>Smash-and-miss</h3><ol>`;
+  h += `</ol></div><div class="card"><h3>Smash-and-miss</h3><div class="cardnote">Scored like a contender, still missed December — top-five offences that never played a playoff game.</div><ol>`;
   S.smash.forEach(r=>{
     h += `<li class="gcrow" ${gct(r)} title="Open their final ${r.y} roster"><span><span class="who">${r.team}</span> <span class="ctx">${r.mgr===r.team?'':r.mgr+' · '}${r.y} · ${r.pfg.toFixed(2)} PF/G, still stayed home</span></span><span class="pts">${r.w}-${r.l}</span></li>`;
   });
@@ -1080,6 +1080,9 @@ li.gcrow{cursor:pointer}
 .exp-rank{font:700 11px 'IBM Plex Mono',monospace; color:var(--muted); min-width:30px}
 .exp-t{flex:1; font-size:14px; font-weight:700; color:#eaeaea; line-height:1.35}
 .exp-t .dim{font-weight:400}
+.exp-u{font-size:10px; color:var(--muted); margin-left:4px; letter-spacing:.06em}
+.exp-sub{display:block; font-size:11px; font-weight:400; color:var(--muted); letter-spacing:.02em; margin-top:2px}
+.cardnote{font-size:11.5px; line-height:1.5; color:var(--muted); margin:-4px 0 9px}
 .exp-n{font:700 14px 'IBM Plex Mono',monospace; color:var(--gold)}
 .exp-tag{font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); text-align:right; max-width:92px; line-height:1.25}
 .exp-c{color:var(--gold); font-size:12px; transition:transform .18s; flex:0 0 auto}
