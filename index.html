@@ -166,7 +166,7 @@ const CHAMPS = {2019:['Titan','JOE'],2020:['Bryce','brotha mane'],2021:['Bryce',
 
 
 /* ---------- nav ---------- */
-const TABS = [['rafters','Rafters'],['managers','Managers'],['seasons','Seasons'],['gamecenter','Game Center'],['records','Record Book'],['storylines','Storylines'],['hof','Hall of Fame'],['drafts','Draft Vault'],['draftw','Draft Day Warriors'],['woodlands','Woodlands']];
+const TABS = [['rafters','Rafters'],['storylines','Storylines'],['hof','Hall of Fame'],['draftw','Draft Day Warriors'],['records','Record Book'],['woodlands','Woodlands'],['managers','Managers'],['gamecenter','Game Center'],['seasons','Seasons'],['drafts','Draft Vault']];
 const navEl = document.getElementById('nav');
 navEl.innerHTML = TABS.map(([id,l])=>`<button data-t="${id}">${l}</button>`).join('');
 navEl.addEventListener('click', e=>{
