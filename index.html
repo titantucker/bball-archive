@@ -168,7 +168,7 @@ const CHAMPS = {2019:['Titan','JOE'],2020:['Bryce','brotha mane'],2021:['Bryce',
 
 
 /* ---------- nav ---------- */
-const TABS = [['rafters','Rafters'],['champs','Champions Corner'],['storylines','Storylines'],['losers','Losers Corner'],['hof','Hall of Fame'],['draftw','Draft Day Warriors'],['records','Record Book'],['woodlands','Woodlands'],['managers','Managers'],['gamecenter','Game Center'],['seasons','Seasons'],['drafts','Draft Vault']];
+const TABS = [['rafters','Rafters'],['managers','Managers'],['champs','Champions Corner'],['storylines','Storylines'],['losers','Losers Corner'],['hof','Hall of Fame'],['draftw','Draft Day Warriors'],['records','Record Book'],['woodlands','Woodlands'],['gamecenter','Game Center'],['seasons','Seasons'],['drafts','Draft Vault']];
 const navEl = document.getElementById('nav');
 navEl.innerHTML = TABS.map(([id,l])=>`<button data-t="${id}">${l}</button>`).join('');
 navEl.addEventListener('click', e=>{
@@ -519,10 +519,10 @@ function show(id){
   const yrs = a => a.map(y=>"'"+String(y).slice(2)).join(' ');
   let h = `<h2>Hall of Fame</h2><div class="sub">The NFL players who built this league's history — computed from every lineup ever started, 2019–2025.</div>`;
 
-  h += `<h2 style="font-size:18px">🚀 Greatest teams ever assembled</h2><div class="sub">The highest-scoring regular seasons ever, ranked by points per game — and how each playoff run actually ended. Tap any row to open that team's final box score of the season. Building the juggernaut and finishing the job are different sports.</div>
+  h += `<h2 style="font-size:18px">🚀 Greatest teams ever assembled</h2><div class="sub">The highest-scoring regular seasons ever, ranked by points per game — and how each playoff run actually ended. Tap any row to see that team's final roster. Building the juggernaut and finishing the job are different sports.</div>
   <div class="tblwrap"><table><thead><tr><th>#</th><th>Team</th><th>Manager</th><th>Season</th><th>PF/G</th><th>Total PF</th><th>Record</th><th>Playoff finish</th></tr></thead><tbody>`;
   EXTRAS.hof.great.forEach((r,i)=>{
-    h += `<tr class="gcrow" data-gcm1="${r.y}.${r.wk}.${r.mgr}" title="Open their final box score of the season"><td>${i+1}</td><td class="name">${r.team}</td><td>${r.mgr===r.team?'<span class="dim">—</span>':r.mgr}</td><td>${r.y}</td><td class="gold-t">${r.pfg.toFixed(2)}</td><td>${fmt(r.pf)}</td><td>${r.w}-${r.l}${r.t?'-'+r.t:''}</td><td>${r.finish}</td></tr>`;
+    h += `<tr class="gcrow" data-gct="${r.y}.${r.wk}.${r.team}~${r.mgr}" title="See their final roster"><td>${i+1}</td><td class="name">${r.team}</td><td>${r.mgr===r.team?'<span class="dim">—</span>':r.mgr}</td><td>${r.y}</td><td class="gold-t">${r.pfg.toFixed(2)}</td><td>${fmt(r.pf)}</td><td>${r.w}-${r.l}${r.t?'-'+r.t:''}</td><td>${r.finish}</td></tr>`;
   });
   h += `</tbody></table></div><div class="note">Fun fact: not one of the ten highest-scoring regular seasons ever ended with a ring. The best offense in league history (Team Tew ’25, 128.03/g) got bounced in the semis.</div>`;
   h += `<h2 style="font-size:18px">💍 GOAT of every championship roster</h2><div class="sub">The engine of each title team — most points started for the champ that season.</div><div class="bracket">`;
@@ -846,6 +846,21 @@ function openBox(i,focus){
   document.getElementById('gc-modal').classList.add('open'); document.getElementById('gc-modal').dataset.i=i; document.getElementById('gc-modal').dataset.mode='g';
   history.replaceState(null,'','#gc/'+curY+'/'+curW+'/'+i);
 }
+function openTeamRoster(y,w,team,mgr){
+  let r=null;
+  const L=(ROSTERS[y]&&ROSTERS[y][w])||[];
+  for(const ln of L){ for(const side of ln.split('|')){ const nm=side.split('~')[0]; if(nm===team){ r=side.split('~').slice(1).join('~'); } } }
+  if(!r){ // fall back to latest week that has their roster
+    const wks=Object.keys(ROSTERS[y]||{}).map(Number).sort((a,b)=>b-a);
+    for(const wk2 of wks){ for(const ln of ROSTERS[y][wk2]){ for(const side of ln.split('|')){ if(side.split('~')[0]===team){ r=side.split('~').slice(1).join('~'); w=wk2; } } } if(r) break; }
+  }
+  if(!r) return;
+  const g=GAMES.find(g=>g.y===y&&g.wk===w&&(g.ta===team||g.tb===team));
+  const sc=g? (g.ta===team? g.pa : g.pb) : null;
+  document.getElementById('gc-boxin').innerHTML=`<button class="gc-close" data-x>✕</button><h3>${team} — final roster</h3>
+    <div class="sub2">${y} · Week ${w} · ${mgr}</div><div class="gc-cols" style="grid-template-columns:1fr">${teamTable(team,mgr,r,sc,false)}</div>`;
+  document.getElementById('gc-modal').classList.add('open'); document.getElementById('gc-modal').dataset.mode='t';
+}
 function openIdle(i){
   const ln=idleLines(curY,curW)[i]; if(!ln) return;
   const nm=ln.split('|')[0].split('~')[0]; const r=ln.split('|')[0].split('~').slice(1).join('~');
@@ -876,6 +891,7 @@ document.addEventListener('click',e=>{
   if(r.dataset.gc){ [y,w,i]=r.dataset.gc.split('.'); y=+y;w=+w;i=+i; }
   else if(r.dataset.gcm){ const p=r.dataset.gcm.split('.'); y=+p[0]; w=+p[1]; const A=p[2],B=p[3]; const gs=GAMES.filter(g=>g.y===y&&g.wk===w); i=gs.findIndex(g=>(g.a===A&&g.b===B)||(g.a===B&&g.b===A)); if(i<0) return; }
   else if(r.dataset.gcm1){ const p=r.dataset.gcm1.split('.'); y=+p[0]; w=+p[1]; const M=p[2]; const gs=GAMES.filter(g=>g.y===y&&g.wk===w); i=gs.findIndex(g=>g.a===M||g.b===M); if(i<0) return; if(!f) f=M; }
+  else if(r.dataset.gct){ const p=r.dataset.gct.split('.'); y=+p[0]; w=+p[1]; const [tm,mg]=p.slice(2).join('.').split('~'); go(y,w); openTeamRoster(y,w,tm,mg); return; }
   else return;
   go(y,w); openBox(i,f);
 });
