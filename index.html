@@ -132,6 +132,7 @@ footer{border-top:1px solid var(--line); color:var(--muted); text-align:center; 
   <section id="sec-seasons"></section>
   <section id="sec-gamecenter"></section>
   <section id="sec-records"></section>
+  <section id="sec-champs"></section>
   <section id="sec-storylines"></section>
   <section id="sec-hof"></section>
   <section id="sec-draftw"></section>
@@ -166,7 +167,7 @@ const CHAMPS = {2019:['Titan','JOE'],2020:['Bryce','brotha mane'],2021:['Bryce',
 
 
 /* ---------- nav ---------- */
-const TABS = [['rafters','Rafters'],['storylines','Storylines'],['hof','Hall of Fame'],['draftw','Draft Day Warriors'],['records','Record Book'],['woodlands','Woodlands'],['managers','Managers'],['gamecenter','Game Center'],['seasons','Seasons'],['drafts','Draft Vault']];
+const TABS = [['rafters','Rafters'],['champs','Champions Corner'],['storylines','Storylines'],['hof','Hall of Fame'],['draftw','Draft Day Warriors'],['records','Record Book'],['woodlands','Woodlands'],['managers','Managers'],['gamecenter','Game Center'],['seasons','Seasons'],['drafts','Draft Vault']];
 const navEl = document.getElementById('nav');
 navEl.innerHTML = TABS.map(([id,l])=>`<button data-t="${id}">${l}</button>`).join('');
 navEl.addEventListener('click', e=>{
@@ -367,11 +368,11 @@ function show(id){
   document.getElementById('sec-records').innerHTML = html;
 })();
 
-/* ---------- STORYLINES ---------- */
+/* ---------- CHAMPIONS CORNER ---------- */
 (function(){
   const S = EXTRAS.story;
   const cwk = y => (y===2019||y===2020)?16:17;
-  let h = `<h2>Storylines</h2><div class="sub">The lore. Seven seasons of glory, pain, and grudges — every card opens the receipts.</div>`;
+  let h = `<h2>Champions Corner</h2><div class="sub">Everything about the ones who finished the job — how they got there, who carried them, and who did it more than once.</div>`;
 
   h += `<h2 style="font-size:18px">🏆 Roads to Glory</h2><div class="sub">How every champion got there. Three of seven titles were won from the bottom half of the bracket — nobody is ever safe.</div><div class="bracket">`;
   S.champ_seed.forEach(c=>{
@@ -381,6 +382,29 @@ function show(id){
       <div class="row ln"><span class="dim">${cinder? 'won it all from the bottom of the bracket':(c.seed===1?'wire to wire — earned it':'took the hard road')}</span></div></div>`;
   });
   h += `</div>`;
+
+  h += `<h2 style="font-size:18px">🦸 Championship-Game Heroes</h2><div class="sub">The biggest individual performances ever dropped in a title game. 🏆 = their side won the ring.</div><div class="grid2"><div class="card"><h3>Top title-game performances</h3><ol>`;
+  EXTRAS.hof.title_heroes.forEach(r=>{
+    h += `<li class="gcrow" data-gcm1="${r.y}.${cwk(r.y)}.${r.mgr}" title="Open box score"><span><span class="who">${r.name} <span class="dim">${r.pos}</span></span> <span class="ctx">${r.won?'🏆 ':''}${r.team} · ${r.y} title game</span></span><span class="pts">${fmt(r.pts)}</span></li>`;
+  });
+  h += `</ol></div><div class="card"><h3>💍 GOAT of every championship roster</h3><ol>`;
+  EXTRAS.hof.goat.forEach(g=>{
+    h += `<li class="gcrow" data-gcm1="${g.y}.${cwk(g.y)}.${g.mgr}" title="Open the title game"><span><span class="who">${g.name} <span class="dim">${g.pos}</span></span> <span class="ctx">${g.y} · ${g.team} (${g.mgr})</span></span><span class="pts">${fmt(g.pts)}</span></li>`;
+  });
+  h += `</ol></div></div>`;
+
+  h += `<h2 style="font-size:18px">👑 Dynasty Corner</h2><div class="sub">Sustained greatness.</div><div class="bracket">`;
+  S.dyn.forEach(d=>{ h += `<div class="game"><div class="rd">${d.span}</div><div class="row ln w"><span>${d.mgr} <span class="dim" style="font-weight:400">— ${d.kind}</span></span></div></div>`; });
+  h += `<div class="game"><div class="rd">2019 · 2022</div><div class="row ln w"><span>Titan <span class="dim" style="font-weight:400">— two rings, three title games</span></span></div></div>`;
+  h += `</div>`;
+  document.getElementById('sec-champs').innerHTML = h;
+})();
+
+/* ---------- STORYLINES ---------- */
+(function(){
+  const S = EXTRAS.story;
+  const cwk = y => (y===2019||y===2020)?16:17;
+  let h = `<h2>Storylines</h2><div class="sub">The lore. Seven seasons of glory, pain, and grudges — every card opens the receipts.</div>`;
 
   h += `<h2 style="font-size:18px">💔 The Heartbreak Wing</h2><div class="sub">Real playoff games — quarterfinals, semifinals, and title games — decided by less than four points. Consolation pain doesn't count; this is the pain that mattered.</div><div class="bracket">`;
   DATA.postseason.games.filter(g=>Math.abs(g.wp-g.lp)<4).sort((a,b)=>(a.wp-a.lp)-(b.wp-b.lp)).forEach(g=>{
@@ -402,10 +426,6 @@ function show(id){
   h += `<h2 style="font-size:18px">🔥 Legendary Decembers</h2><div class="sub">The biggest scores ever dropped in a win-or-go-home game.</div><div class="grid2"><div class="card"><h3>Best playoff team games</h3><ol>`;
   S.clutch.forEach(r=>{
     h += `<li class="gcrow" data-gcm1="${r.y}.${r.wk}.${r.mgr}" title="Open box score"><span><span class="who">${r.mgr}</span> <span class="ctx">${r.mgr===r.team?'':r.team+' · '}${r.y} Week ${r.wk} vs ${r.opp}</span></span><span class="pts">${fmt(r.pts)}</span></li>`;
-  });
-  h += `</ol></div><div class="card"><h3>Championship-game heroes</h3><ol>`;
-  EXTRAS.hof.title_heroes.forEach(r=>{
-    h += `<li class="gcrow" data-gcm1="${r.y}.${cwk(r.y)}.${r.mgr}" title="Open box score"><span><span class="who">${r.name} <span class="dim">${r.pos}</span></span> <span class="ctx">${r.won?'🏆 ':''}${r.team} · ${r.y} title game</span></span><span class="pts">${fmt(r.pts)}</span></li>`;
   });
   h += `</ol></div></div>`;
 
@@ -458,10 +478,6 @@ function show(id){
   });
   h += `</tbody></table></div>`;
 
-  h += `<h2 style="font-size:18px">👑 Dynasty Corner</h2><div class="sub">Sustained greatness.</div><div class="bracket">`;
-  S.dyn.forEach(d=>{ h += `<div class="game"><div class="rd">${d.span}</div><div class="row ln w"><span>${d.mgr} <span class="dim" style="font-weight:400">— ${d.kind}</span></span></div></div>`; });
-  h += `<div class="game"><div class="rd">2019 · 2022</div><div class="row ln w"><span>Titan <span class="dim" style="font-weight:400">— two rings, three title games</span></span></div></div>`;
-  h += `</div>`;
   h += `<h2 style="font-size:18px">🔥 Playoff Streaks</h2><div class="sub">Consecutive playoff appearances. Anything with a 🔴 is still alive.</div><div class="bracket">`;
   S.postreaks.forEach(s=>{
     h += `<div class="game"><div class="rd">${s.from}–${s.to}${s.active?' · 🔴 ACTIVE':''}</div>
