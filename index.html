@@ -199,7 +199,7 @@ function show(id){
   });
   html += '</tbody></table></div>';
   // The Basement — regular season last place (the league's real loser)
-  html += `<h2>The Basement</h2><div class="sub">This league ignores the toilet bowl — the real loser of a season is whoever finished last in the regular season. Honor them.</div>
+  html += `<h2>The Basement</h2><div class="sub">No toilet bowl here — the season's real loser is whoever finished last in the regular season. Honor them.</div>
   <div class="tblwrap"><table><thead><tr><th>Year</th><th>Regular season loser</th><th>Manager</th><th>Record</th></tr></thead><tbody>`;
   YEARS_DESC.forEach(y=>{
     const rows = DATA.seasons[y].rows;
@@ -232,7 +232,7 @@ function show(id){
     const ps = (DATA.postseason.table[m]) || {apps:0,w:0,l:0,titles:[],finals:[]};
     return {m, ...v, gp, ps, pct: gp? (v.w+0.5*v.t)/gp : 0, pfg: gp? v.pf/gp : 0};
   }).sort((a,b)=> b.pct-a.pct);
-  let html = `<h2>All-time table</h2><div class="sub">Combined record across all games; PF/G = points per game. Playoff W-L counts championship-path games only (QF · SF · Final) — no 3rd/5th place games, no consolation. Sorted by win percentage.</div>
+  let html = `<h2>All-time table</h2><div class="sub">Every game, all eras, sorted by win percentage. PF/G = points per game. Playoff W-L counts championship-path games only — no consolation.</div>
   <div class="tblwrap"><table><thead><tr><th>Manager</th><th>Yrs</th><th>W-L-T</th><th>Pct</th><th>PF/G</th><th>Playoff W-L</th><th>Best week</th><th>🏆</th></tr></thead><tbody>`;
   rows.forEach(r=>{
     html += `<tr><td class="name">${r.m}</td><td>${r.seasons}</td><td>${r.w}-${r.l}-${r.t}</td>
@@ -241,7 +241,7 @@ function show(id){
       <td>${r.titles.length? '<span class="trophy">'+'🏆'.repeat(r.titles.length)+'</span>':'<span class="dim">—</span>'}</td></tr>`;
   });
   html += `</tbody></table></div>
-  <h2>Postseason ledger</h2><div class="sub">Real playoff games only — the winner had to advance or lift the trophy. 5th place games, 3rd place games, and the entire toilet bowl do not exist here. First-round byes count as nothing in the W-L (but we count the byes themselves — a top-2 seed is a flex). 4th place = lost the 3rd-place game (lowkey still impressive). Woodlands titles (Matt ’17, Reed ’18) credited as 2-0 runs — three-round bracket, first-round bye, opponents lost to history.</div>
+  <h2>Postseason ledger</h2><div class="sub">Championship-path games only — every win here advanced someone or won the title. Consolation games don't exist. Byes are listed but count for nothing in the W-L. 3rd place = won the 3rd-place game; 4th = lost it (still a top-4 season). Woodlands titles (Matt ’17, Reed ’18) credited as 2-0 runs with a first-round bye — opponents lost to history.</div>
   <div class="tblwrap"><table><thead><tr><th>Manager</th><th>Berths</th><th>1st-rd byes</th><th>Playoff W-L</th><th>Title games</th><th>Titles</th><th>3rd place</th><th>4th place</th><th>Berth years</th></tr></thead><tbody>`;
   Object.entries(DATA.postseason.table).sort((a,b)=> (b[1].w-a[1].w) || (b[1].titles.length-a[1].titles.length)).forEach(([m,v])=>{
     const by = EXTRAS.byes[m]||[], fo = EXTRAS.fourth[m]||[], th = (DATA.managers[m]&&DATA.managers[m].third)||[];
@@ -255,7 +255,7 @@ function show(id){
       <td class="dim">${v.years.join(', ')}</td></tr>`;
   });
   html += `</tbody></table></div>
-  <h2>Head-to-head</h2><div class="sub">All games, all eras — read across: that manager's wins vs each opponent. Green = winning record.</div>`;
+  <h2>Head-to-head</h2><div class="sub">Read across: that row's record vs each opponent, all eras. Green = winning record.</div>`;
   const names = Object.keys(M).sort((a,b)=> (M[b].w+M[b].l) - (M[a].w+M[a].l));
   const abbr = n => n.replace(/^The /,'').slice(0,4);
   html += `<div class="h2h"><table><thead><tr><th class="rowh"></th>${names.map(n=>`<th title="${n}">${abbr(n)}</th>`).join('')}</tr></thead><tbody>`;
@@ -409,7 +409,7 @@ function show(id){
   });
   h += `</ol></div></div>`;
 
-  h += `<h2 style="font-size:18px">🔮 The What-If Machine</h2><div class="sub">Playoff games BEFORE the final that were decided by less than six points — and what the real scores say would have happened next. No fantasy math, no projections: every number below actually hit the scoreboard.</div><div class="wi-wrap">`;
+  h += `<h2 style="font-size:18px">🔮 The What-If Machine</h2><div class="sub">Playoff games before the final decided by fewer than six points — and what the real scores say happens if they flip. No projections: every number here actually hit the scoreboard.</div><div class="wi-wrap">`;
   S.whatif.forEach(e=>{
     const base=(e.y===2019||e.y===2020)?13:14; const wk=base+({Quarterfinal:1,Semifinal:2})[e.rd];
     h += `<div class="wi-card gcrow" data-gcm="${e.y}.${wk}.${e.w}.${e.l}" data-f="${e.l}" title="Open the real box score">
@@ -419,7 +419,7 @@ function show(id){
   });
   h += `</div>`;
 
-  h += `<h2 style="font-size:18px">👻 Ghost Champions</h2><div class="sub">The ultimate what-if: every team's REAL score in championship week, measured against the champion's winning score. These teams outscored the champ the very week the ring was handed out — they just weren't in the room.</div><div class="bracket">`;
+  h += `<h2 style="font-size:18px">👻 Ghost Champions</h2><div class="sub">Every team's real score in championship week vs the number that actually won the ring. These teams outscored the champ that very week — they just weren't in the game.</div><div class="bracket">`;
   S.ghosts.forEach(g=>{
     const wk=(g.y===2019||g.y===2020)?16:17;
     if(!g.list.length){
@@ -437,7 +437,7 @@ function show(id){
   });
   h += `</div><div class="note">2023 is the wildest one: <b>eight</b> teams outscored Garrett's 98.92 in championship week — Bryce dropped 157.26 into the void of the consolation bracket. And 2025? Matt's 137.02 beat every score in the league that week. Undisputed.</div>`;
 
-  h += `<h2 style="font-size:18px">🎲 The Unlucky Ones</h2><div class="sub">Points against doesn't lie — these teams took more incoming fire than anyone, every single week.</div>
+  h += `<h2 style="font-size:18px">🎲 The Unlucky Ones</h2><div class="sub">The most points against per game in league history — nobody's schedule hit harder.</div>
   <div class="grid2"><div class="card"><h3>Most points against per game (all time)</h3><ol>`;
   S.unlucky.forEach(r=>{
     h += `<li><span><span class="who">${r.mgr===r.team? r.team : r.team}</span> <span class="ctx">${r.mgr===r.team?'':r.mgr+' · '}${r.y} · went ${r.w}-${r.l}${r.t?'-'+r.t:''} · ${r.finish}</span></span><span class="pts">${r.pag.toFixed(2)}</span></li>`;
@@ -483,7 +483,7 @@ function show(id){
   const yrs = a => a.map(y=>"'"+String(y).slice(2)).join(' ');
   let h = `<h2>Hall of Fame</h2><div class="sub">The NFL players who built this league's history — computed from every lineup ever started, 2019–2025.</div>`;
 
-  h += `<h2 style="font-size:18px">🚀 Greatest teams ever assembled</h2><div class="sub">Highest regular-season scoring machines in league history (points per game), and how their playoff runs actually ended. Building the juggernaut and finishing the job are two different sports.</div>
+  h += `<h2 style="font-size:18px">🚀 Greatest teams ever assembled</h2><div class="sub">The highest-scoring regular seasons ever, ranked by points per game — and how each playoff run actually ended. Building the juggernaut and finishing the job are different sports.</div>
   <div class="tblwrap"><table><thead><tr><th>#</th><th>Team</th><th>Manager</th><th>Season</th><th>PF/G</th><th>Total PF</th><th>Record</th><th>Playoff finish</th></tr></thead><tbody>`;
   EXTRAS.hof.great.forEach((r,i)=>{
     h += `<tr><td>${i+1}</td><td class="name">${r.team}</td><td>${r.mgr===r.team?'<span class="dim">—</span>':r.mgr}</td><td>${r.y}</td><td class="gold-t">${r.pfg.toFixed(2)}</td><td>${fmt(r.pf)}</td><td>${r.w}-${r.l}${r.t?'-'+r.t:''}</td><td>${r.finish}</td></tr>`;
@@ -496,9 +496,9 @@ function show(id){
   });
   h += `</div><div class="grid2">`;
 
-  h += `<div class="card"><h3>💍 Ring bearers — most championships started</h3><ol>${H.rings.map(r=>`<li><span><span class="who">${r.name} <span class="dim">${r.pos}</span></span> <span class="ctx">${yrs(r.years)}</span></span><span class="pts">${r.n} 💍</span></li>`).join('')}</ol></div>`;
+  h += `<div class="card"><h3>💍 Ring bearers — championships won as a starter</h3><ol>${H.rings.map(r=>`<li><span><span class="who">${r.name} <span class="dim">${r.pos}</span></span> <span class="ctx">${yrs(r.years)}</span></span><span class="pts">${r.n} 💍</span></li>`).join('')}</ol></div>`;
   h += `<div class="card"><h3>🎪 Big-game regulars — title game starts</h3><ol>${H.tapps.map(r=>`<li><span><span class="who">${r.name} <span class="dim">${r.pos}</span></span> <span class="ctx">${yrs(r.years)}</span></span><span class="pts">${r.n}</span></li>`).join('')}</ol></div>`;
-  h += `<div class="card"><h3>❄️ January veterans — playoff runs started in</h3><ol>${H.berths.map(r=>`<li><span><span class="who">${r.name} <span class="dim">${r.pos}</span></span> <span class="ctx">${yrs(r.years)}</span></span><span class="pts">${r.n}</span></li>`).join('')}</ol></div>`;
+  h += `<div class="card"><h3>❄️ January veterans — playoff runs played in</h3><ol>${H.berths.map(r=>`<li><span><span class="who">${r.name} <span class="dim">${r.pos}</span></span> <span class="ctx">${yrs(r.years)}</span></span><span class="pts">${r.n}</span></li>`).join('')}</ol></div>`;
   h += `<div class="card"><h3>📈 All-time scoring leaders (as starters)</h3><ol>${H.career.map(r=>`<li><span><span class="who">${r.name} <span class="dim">${r.pos}</span></span> <span class="ctx">${r.wk} starts · ${r.mgrs} manager${r.mgrs===1?'':'s'}</span></span><span class="pts">${fmt(r.pts)}</span></li>`).join('')}</ol></div>`;
   h += `<div class="card"><h3>🪨 Most weeks started</h3><ol>${H.started.map(r=>`<li><span><span class="who">${r.name} <span class="dim">${r.pos}</span></span> <span class="ctx">${fmt(r.pts)} career pts</span></span><span class="pts">${r.wk}</span></li>`).join('')}</ol></div>`;
   h += `</div>`;
