@@ -660,13 +660,13 @@ function show(id){
     <td class="${p.d>0?'bad-t':'gold-t'}">${p.d>0?'+':''}${p.d}</td></tr>`;
   const TH=`<tr><th>Season</th><th>Pick</th><th>Player</th><th>Drafted by</th><th>Expected</th><th>Finished</th><th>Wks</th><th>Points</th><th>Miss</th></tr>`;
 
-  g += `<h2 style="font-size:18px;margin-top:4px">💀 Worst picks ever</h2>
-  <div class="cardnote">Where he went at his position against where he finished. <b>Only players who produced in 13+ weeks</b> — you can't call a guy a bust if his season ended in October.</div>
-  <div class="tblwrap slim"><table><thead>${TH}</thead><tbody>${(DW.worst||[]).map(row).join('')}</tbody></table></div>`;
-
-  g += `<h2 style="font-size:18px">💎 Best picks ever</h2>
+  g += `<h2 style="font-size:18px;margin-top:4px">💎 Best picks ever</h2>
   <div class="cardnote">Sleepers — nobody took them until the 20th man off the board at their position, and they finished like first-rounders.</div>
   <div class="tblwrap slim"><table><thead>${TH}</thead><tbody>${(DW.steals||[]).map(row).join('')}</tbody></table></div>`;
+
+  g += `<h2 style="font-size:18px">💀 Worst picks ever</h2>
+  <div class="cardnote">Where he went at his position against where he finished. <b>Only players who produced in 13+ weeks</b> — you can't call a guy a bust if his season ended in October.</div>
+  <div class="tblwrap slim"><table><thead>${TH}</thead><tbody>${(DW.worst||[]).map(row).join('')}</tbody></table></div>`;
 
   if((DW.trick||[]).length){
     g += `<h2 style="font-size:18px">🎣 They keep tricking us</h2>
