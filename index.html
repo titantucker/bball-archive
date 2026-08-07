@@ -24,10 +24,9 @@ header{position:relative; overflow:hidden; border-bottom:1px solid var(--line);
 .banners{position:relative; overflow:hidden; padding:0; -webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);
   mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
 .bn-track{display:flex; gap:14px; align-items:flex-start; width:max-content; padding:0 7px;
-  animation:bn-roll 88s linear infinite; will-change:transform}
+  animation:bn-roll var(--bn-dur,90s) linear infinite; will-change:transform}
 .banners:hover .bn-track, .banners:active .bn-track{animation-play-state:paused}
 @keyframes bn-roll{ from{transform:translate3d(0,0,0)} to{transform:translate3d(calc(-50% - 7px),0,0)} }
-.banners.nofit .bn-track{animation:none; justify-content:center; width:100%}
 @media(prefers-reduced-motion:reduce){ .bn-track{animation:none; justify-content:center} }
 .banner{flex:0 0 auto; width:92px; text-align:center; color:#F6EAD0; padding:14px 6px 26px;
   clip-path:polygon(0 0,100% 0,100% calc(100% - 16px),50% 100%,0 calc(100% - 16px));
@@ -187,13 +186,21 @@ const CHAMPS = {2019:['Titan','JOE'],2020:['Bryce','brotha mane'],2021:['Bryce',
   [...ALLCH].sort((a,b)=>b[0]-a[0]).forEach(([y,m,t])=>{
     html += `<div class="banner ${goldYr[y]?'gold':''}"><div class="yr">${y}</div><div class="who">${m}</div><div class="tm">${t}</div></div>`;
   });
-  // two copies back to back so the loop never shows a seam
-  el.innerHTML = `<div class="bn-track" aria-label="Championship banners">${html}${html.replace(/<div class="banner/g,'<div aria-hidden="true" class="banner')}</div>`;
-  const fit = () => {
+  // repeat the set enough times to fill any screen twice over, so the loop never shows a seam
+  const ghost = html.replace(/<div class="banner/g, '<div aria-hidden="true" class="banner');
+  const SPEED = 17;                                  // px per second — slow enough to read
+  const build = () => {
+    el.innerHTML = `<div class="bn-track">${html}</div>`;
+    const one = el.querySelector('.bn-track').scrollWidth;
+    // even number of copies, at least 2, and wide enough to cover the viewport twice
+    let n = Math.max(2, Math.ceil(el.clientWidth / one) * 2);
+    if (n % 2) n++;
+    el.innerHTML = `<div class="bn-track" aria-label="Championship banners">${html}${ghost.repeat(n-1)}</div>`;
     const tr = el.querySelector('.bn-track');
-    el.classList.toggle('nofit', tr.scrollWidth / 2 <= el.clientWidth);
+    tr.style.setProperty('--bn-dur', (tr.scrollWidth / 2 / SPEED).toFixed(1) + 's');
   };
-  fit(); window.addEventListener('resize', fit);
+  build();
+  let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(build, 200); });
 })();
 
 
